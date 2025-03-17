@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: '0 0 * * 0'  # Weekly scan on Sundays at midnight UTC
+    - cron: '0 0 * * 0'  # Weekly scan
 
 jobs:
   analyze:
@@ -28,7 +28,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential tcl
+        sudo apt-get install -y build-essential tcl libssl-dev libjemalloc-dev
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -36,9 +36,9 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: manual
 
-    - name: Build Redis
+    - name: Build Redis with TLS and jemalloc
       run: |
-        make BUILD_TLS=yes -j$(nproc)
+        make BUILD_TLS=yes MALLOC=jemalloc -j$(nproc)
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
