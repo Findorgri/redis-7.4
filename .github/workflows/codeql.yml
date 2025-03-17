@@ -28,7 +28,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential tcl libssl-dev libjemalloc-dev
+        sudo apt-get install -y build-essential tcl libssl-dev
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -36,9 +36,13 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: manual
 
-    - name: Build Redis with TLS and jemalloc
+    - name: Fix jemalloc configure script permissions
       run: |
-        make BUILD_TLS=yes MALLOC=jemalloc -j$(nproc)
+        chmod +x deps/jemalloc/configure
+
+    - name: Build Redis
+      run: |
+        make BUILD_TLS=yes -j$(nproc)
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
